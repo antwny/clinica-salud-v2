@@ -17,6 +17,7 @@ import com.formdev.flatlaf.FlatLightLaf;
 import clases.Calendario;
 
 import javax.swing.UIManager;
+import java.awt.SystemColor;
 
 
 public class LoginAcceso extends JFrame  {
@@ -57,12 +58,13 @@ public class LoginAcceso extends JFrame  {
         setBounds(100, 100, 512, 512);
         
         contentPane = new JPanel();
+        contentPane.setBackground(SystemColor.activeCaption);
         
         contentPane.setLayout(null);
         setContentPane(contentPane);
 
         JLabel lblUsuario = new JLabel("USUARIO :");
-        lblUsuario.setForeground(Color.WHITE);
+        lblUsuario.setForeground(Color.BLACK);
         
         lblUsuario.setFont(new Font("Segoe UI Black", Font.PLAIN, 20));
         lblUsuario.setBounds(70, 134, 116, 25);
@@ -74,8 +76,8 @@ public class LoginAcceso extends JFrame  {
         contentPane.add(txtUsuario);
         txtUsuario.setColumns(10);
 
-        JLabel lblClave = new JLabel("CONTRASE�A :");
-        lblClave.setForeground(Color.WHITE);
+        JLabel lblClave = new JLabel("CONTRASEÑA :");
+        lblClave.setForeground(Color.BLACK);
         
         lblClave.setFont(new Font("Segoe UI Black", Font.PLAIN, 20));
         lblClave.setBounds(70, 194, 151, 25);
@@ -114,7 +116,7 @@ public class LoginAcceso extends JFrame  {
         	            break;
         	        }
         	        }catch (Exception z) { 
-        	        	System.out.println("Ingres� usuario y clave");
+        	        	System.out.println("Ingrese usuario y clave");
         	        	}
         	    }
         	    if (acceso) {
@@ -138,7 +140,7 @@ public class LoginAcceso extends JFrame  {
         	        frm.setLocationRelativeTo(null);
         	        dispose();
         	    } else {
-        	        mensajeError("�Acceso denegado!");
+        	        mensajeError("Acceso denegado!");
         	        txtUsuario.setText("");
         	        jPass.setText("");
         	        txtUsuario.requestFocus();
@@ -184,7 +186,7 @@ public class LoginAcceso extends JFrame  {
         contentPane.add(btnCancelar);
         
         JLabel lblBienvenido = new JLabel("Ingrese Datos\r\n");
-        lblBienvenido.setForeground(Color.WHITE);
+        lblBienvenido.setForeground(Color.BLACK);
         lblBienvenido.setHorizontalAlignment(SwingConstants.CENTER);
         
         lblBienvenido.setFont(new Font("Arial Black", Font.PLAIN, 35));
@@ -203,11 +205,6 @@ public class LoginAcceso extends JFrame  {
       //Visualizar hora en tiempo real
         Timer timer = new Timer(1000, e -> actualizarHora());
         timer.start();
-        
-        JLabel lblFondo = new JLabel("");
-        lblFondo.setIcon(new ImageIcon(LoginAcceso.class.getResource("/recursos/luilogin.gif")));
-        lblFondo.setBounds(0, -12, 512, 535);
-        contentPane.add(lblFondo);
     }
 
     private String getClave() {
