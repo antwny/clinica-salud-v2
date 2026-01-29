@@ -49,15 +49,20 @@ public class ArregloTratamientos {
     }
 
     public Tratamiento buscar(int codigo) {
+        // Prefer returning the in-memory instance so GUI modifications affect the list.
+        for (Tratamiento t : tratamientos) if (t.getCodTratamiento() == codigo) return t;
+        // If not found in memory, and DB is available, try DB and add to memory for future consistency.
         if (useDB && tratamientoDAO != null) {
             try {
                 Tratamiento t = tratamientoDAO.buscar(codigo);
-                if (t != null) return t;
+                if (t != null) {
+                    tratamientos.add(t);
+                    return t;
+                }
             } catch (SQLException e) {
                 System.out.println("Error al buscar tratamiento en BD, usando cache: " + e.getMessage());
             }
         }
-        for (Tratamiento t : tratamientos) if (t.getCodTratamiento() == codigo) return t;
         return null;
     }
 

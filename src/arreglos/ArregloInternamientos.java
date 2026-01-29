@@ -49,15 +49,19 @@ public class ArregloInternamientos {
     }
 
     public Internamiento buscar(int codigo) {
+        // Prefer returning the in-memory instance so GUI modifications affect the list.
+        for (Internamiento x : internamientos) if (x.getNumInternamiento() == codigo) return x;
         if (useDB && internamientoDAO != null) {
             try {
                 Internamiento x = internamientoDAO.buscar(codigo);
-                if (x != null) return x;
+                if (x != null) {
+                    internamientos.add(x);
+                    return x;
+                }
             } catch (SQLException e) {
                 System.out.println("Error al buscar internamiento en BD, usando cache: " + e.getMessage());
             }
         }
-        for (Internamiento x : internamientos) if (x.getNumInternamiento() == codigo) return x;
         return null;
     }
 

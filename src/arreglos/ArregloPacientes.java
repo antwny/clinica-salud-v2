@@ -63,19 +63,22 @@ public class ArregloPacientes {
     }
 
     public Paciente buscar(int codigo) {
-        // If using DB, try to query directly to ensure latest data; otherwise search in-memory list.
-        if (useDB && pacienteDAO != null) {
-            try {
-                Paciente p = pacienteDAO.buscar(codigo);
-                if (p != null) return p;
-                // fallback to in-memory
-            } catch (SQLException e) {
-                System.out.println("Error al buscar paciente en BD, usando cache: " + e.getMessage());
-            }
-        }
+        // Prefer returning the in-memory instance so GUI modifications affect the list.
         for (Paciente p : pacientes) {
             if (p.getCodPaciente() == codigo)
                 return p;
+        }
+        // If not found in memory, and DB is available, try DB and add to memory for future consistency.
+        if (useDB && pacienteDAO != null) {
+            try {
+                Paciente p = pacienteDAO.buscar(codigo);
+                if (p != null) {
+                    pacientes.add(p);
+                    return p;
+                }
+            } catch (SQLException e) {
+                System.out.println("Error al buscar paciente en BD, usando cache: " + e.getMessage());
+            }
         }
         return null;
     }

@@ -49,17 +49,23 @@ public class ArregloAltas {
     }
 
     public Alta buscar(int codigo) {
+        // Prefer returning the in-memory instance so GUI modifications affect the list.
+        for (Alta a : altas) if (a.getNumAlta() == codigo) return a;
         if (useDB && altaDAO != null) {
             try {
                 Alta a = altaDAO.buscar(codigo);
-                if (a != null) return a;
+                if (a != null) {
+                    altas.add(a);
+                    return a;
+                }
             } catch (SQLException e) {
                 System.out.println("Error al buscar alta en BD, usando cache: " + e.getMessage());
             }
         }
-        for (Alta a : altas) if (a.getNumAlta() == codigo) return a;
         return null;
     }
+
+    public int tamanioX() { return altas.size(); }
 
     public int codigoCorrelativo() {
         if (useDB && altaDAO != null) {
