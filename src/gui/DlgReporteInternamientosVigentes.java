@@ -2,6 +2,13 @@ package gui;
 
 import arreglos.*;
 
+//itext imports
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
+import java.io.FileOutputStream;
+import javax.swing.JFileChooser;
+
 import clases.*;
 import java.awt.Font;
 import javax.swing.*;
@@ -47,6 +54,15 @@ public class DlgReporteInternamientosVigentes extends JDialog implements ActionL
 		btnListar.setBounds(219, 11, 206, 30);
 		getContentPane().add(btnListar);
 		
+		JButton btnExportarPdf = new JButton("Exportar PDF");
+		btnExportarPdf.setBounds(435, 11, 150, 30); // Ajusta la posición
+		btnExportarPdf.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        generarPDF();
+		    }
+		});
+		getContentPane().add(btnExportarPdf);
+		
 		scrollPane = new JScrollPane();
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		scrollPane.setBounds(10, 50, 606, 440);
@@ -61,6 +77,34 @@ public class DlgReporteInternamientosVigentes extends JDialog implements ActionL
 	
 	ArregloPacientes aa = new ArregloPacientes();
 	
+	private void generarPDF() {
+	    JFileChooser chooser = new JFileChooser();
+	    chooser.setDialogTitle("Guardar Reporte como PDF");
+	    int selection = chooser.showSaveDialog(this);
+
+	    if (selection == JFileChooser.APPROVE_OPTION) {
+	        String ruta = chooser.getSelectedFile().getAbsolutePath();
+	        if (!ruta.endsWith(".pdf")) ruta += ".pdf";
+
+	        try {
+	            Document doc = new Document();
+	            PdfWriter.getInstance(doc, new FileOutputStream(ruta));
+	            doc.open();
+	            
+	            // Título del PDF
+	            doc.add(new Paragraph("CLÍNICA SALUD - REPORTE OFICIAL"));
+	            doc.add(new Paragraph("--------------------------------------------------"));
+	            
+	            // Obtenemos el texto del JTextArea que ya llenaste con el botón Listar
+	            doc.add(new Paragraph(txtResultado.getText()));
+
+	            doc.close();
+	            JOptionPane.showMessageDialog(this, "PDF generado con éxito en: " + ruta);
+	        } catch (Exception e) {
+	            JOptionPane.showMessageDialog(this, "Error al crear el PDF: " + e.getMessage());
+	        }
+	    }
+	}
 	
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == btnListar) {

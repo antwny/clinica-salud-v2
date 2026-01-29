@@ -2,6 +2,13 @@ package gui;
 
 import arreglos.*;
 
+//itext imports
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
+import java.io.FileOutputStream;
+import javax.swing.JFileChooser;
+
 import clases.*;
 import java.awt.Font;
 import java.awt.Insets;
@@ -58,6 +65,15 @@ public class DlgReportePacientesPorTratamiento extends JDialog implements Action
 		btnListar.addActionListener(this);
 		btnListar.setFont(new Font("Segoe UI Black", Font.PLAIN, 14));
 		btnListar.setBackground(new Color(84, 163, 188));
+		
+		JButton btnExportarPdf = new JButton("Exportar PDF");
+		btnExportarPdf.setBounds(435, 11, 150, 30); // Ajusta la posici√≥n
+		btnExportarPdf.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        generarPDF();
+		    }
+		});
+		getContentPane().add(btnExportarPdf);
 
 		btnListar.setBounds(230, 10, 180, 30);
 		getContentPane().add(btnListar);
@@ -79,7 +95,35 @@ public class DlgReportePacientesPorTratamiento extends JDialog implements Action
 	ArregloTratamientos ac = new ArregloTratamientos();
 	ArregloInternamientos am = new ArregloInternamientos();
 
+	private void generarPDF() {
+	    JFileChooser chooser = new JFileChooser();
+	    chooser.setDialogTitle("Guardar Reporte como PDF");
+	    int selection = chooser.showSaveDialog(this);
 
+	    if (selection == JFileChooser.APPROVE_OPTION) {
+	        String ruta = chooser.getSelectedFile().getAbsolutePath();
+	        if (!ruta.endsWith(".pdf")) ruta += ".pdf";
+
+	        try {
+	            Document doc = new Document();
+	            PdfWriter.getInstance(doc, new FileOutputStream(ruta));
+	            doc.open();
+	            
+	            // T√≠tulo del PDF
+	            doc.add(new Paragraph("CL√çNICA SALUD - REPORTE OFICIAL"));
+	            doc.add(new Paragraph("--------------------------------------------------"));
+	            
+	            // Obtenemos el texto del JTextArea que ya llenaste con el bot√≥n Listar
+	            doc.add(new Paragraph(txtResultado.getText()));
+
+	            doc.close();
+	            JOptionPane.showMessageDialog(this, "PDF generado con √©xito en: " + ruta);
+	        } catch (Exception e) {
+	            JOptionPane.showMessageDialog(this, "Error al crear el PDF: " + e.getMessage());
+	        }
+	    }
+	}
+	
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == btnListar) {
 			actionPerformedBtnListar(e);
@@ -98,7 +142,7 @@ public class DlgReportePacientesPorTratamiento extends JDialog implements Action
 			Tratamiento tratamiento = ac.obtener(i);
 			
 			imprimir("TRATAMIENTO : " + tratamiento.getNombreTratamiento());
-			imprimir("DURACI”N    : " + tratamiento.getDuracionDias() + " dÌas");
+			imprimir("DURACIÔøΩN    : " + tratamiento.getDuracionDias() + " dÔøΩas");
 			imprimir("COSTO       : S/. " + tratamiento.getCosto());
 			imprimir("");
 
@@ -112,7 +156,7 @@ public class DlgReportePacientesPorTratamiento extends JDialog implements Action
 						hayInternamientos = true;
 						imprimir(" * PACIENTE : " + p.getNombres() + " " + p.getApellidos());
 						imprimir("   DNI      : " + p.getDni());
-						imprimir("   EDAD     : " + p.getEdad() + " aÒos");
+						imprimir("   EDAD     : " + p.getEdad() + " aÔøΩos");
 						imprimir("   FECHA INGRESO : " + internamiento.getFecha() + "  HORA : " + internamiento.getHora());
 						imprimir("");
 					}
@@ -127,7 +171,7 @@ public class DlgReportePacientesPorTratamiento extends JDialog implements Action
 		}
 
 		if (!hayInternamientos) {
-			imprimir("No se encontraron pacientes internados en ning˙n tratamiento.\n");
+			imprimir("No se encontraron pacientes internados en ningÔøΩn tratamiento.\n");
 		}
 	}
 
