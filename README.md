@@ -1,8 +1,8 @@
-# 🏥 Clínica +Salud
+# 🏥 Clínica +Salud v2 - MySQL + Reportes PDF
 
-### Sistema de Registro e Internamiento de Pacientes
+Esta es la evolución del proyecto original Clínica +Salud. Tras una primera fase basada en persistencia de datos en archivos planos (.txt), esta versión migra a una arquitectura robusta con Base de Datos Relacional y capacidades de Reporting empresarial.
 
-Proyecto académico desarrollado en **Java** (CIBERTEC – 2025) para automatizar la gestión clínica y digitalizar procesos de registro, internamiento, tratamiento y alta médica.
+El sistema permite gestionar el flujo completo de una clínica: registro de pacientes, asignación de citas médicas y generación de documentación oficial en formato digital.
 
 ## 🚀 Características Principales
 
@@ -10,8 +10,8 @@ Proyecto académico desarrollado en **Java** (CIBERTEC – 2025) para automatiza
 * 🏥 **Internamiento de pacientes** con asignación de tratamientos y control de estado.
 * 💊 **Gestión de tratamientos**: duración, sesiones y costos.
 * ✅ **Altas médicas** automáticas con actualización del historial del paciente.
-* 📊 **Reportes y consultas**: pacientes internados, dados de alta o por tratamiento.
-* 💾 **Persistencia de datos** mediante archivos `.txt`.
+* 📊 **Reportes PDF y consultas**: pacientes internados, dados de alta o por tratamiento.
+* 💾 **Persistencia de datos** mediante MySQL.
 * 🧠 **Estructuras de datos** (ArrayList) para almacenamiento dinámico.
 * 🖥️ **Interfaz gráfica** intuitiva desarrollada con **Java Swing**.
 * 🔒 **Integridad de información** con validaciones y respaldo local.
@@ -21,7 +21,7 @@ Proyecto académico desarrollado en **Java** (CIBERTEC – 2025) para automatiza
 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/antwny/clinicaMasSalud
+git clone https://github.com/antwny/clinica-salud-v2
 cd clinicaMasSalud
 # Importar a Eclipse IDE
 Moverse a src/gui/

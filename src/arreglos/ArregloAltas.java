@@ -3,24 +3,41 @@ package arreglos;
 import java.io.*;
 import java.util.ArrayList;
 import clases.Alta;
+import persistencia.AltaDAO;
+import persistencia.DBConnection;
+import java.sql.SQLException;
 
 public class ArregloAltas {
     private ArrayList<Alta> altas;
     private static final String RUTA_ARCHIVO = System.getProperty("user.dir") + File.separator + "altas.txt";
+    private boolean useDB = false;
+    private AltaDAO altaDAO = null;
 
     public ArregloAltas() {
         altas = new ArrayList<Alta>();
+        try { useDB = DBConnection.isAvailable(); } catch (Exception e) { useDB = false; }
+        if (useDB) altaDAO = new AltaDAO();
         cargarAltas();
     }
 
     public void adicionar(Alta x) {
         altas.add(x);
-        grabarAltas();
+        if (useDB && altaDAO != null) {
+            try { altaDAO.insertar(x); } catch (SQLException e) {
+                System.out.println("Error al insertar alta en BD, guardando en .txt: " + e.getMessage());
+                grabarAltas();
+            }
+        } else grabarAltas();
     }
 
     public void eliminar(Alta x) {
         altas.remove(x);
-        grabarAltas();
+        if (useDB && altaDAO != null) {
+            try { altaDAO.eliminar(x.getNumAlta()); } catch (SQLException e) {
+                System.out.println("Error al eliminar alta en BD, actualizando .txt: " + e.getMessage());
+                grabarAltas();
+            }
+        } else grabarAltas();
     }
 
     public int tamanio() {
@@ -32,20 +49,41 @@ public class ArregloAltas {
     }
 
     public Alta buscar(int codigo) {
-        for (Alta x : altas) {
-            if (x.getNumAlta() == codigo)
-                return x;
+        if (useDB && altaDAO != null) {
+            try {
+                Alta a = altaDAO.buscar(codigo);
+                if (a != null) return a;
+            } catch (SQLException e) {
+                System.out.println("Error al buscar alta en BD, usando cache: " + e.getMessage());
+            }
         }
+        for (Alta a : altas) if (a.getNumAlta() == codigo) return a;
         return null;
     }
 
     public int codigoCorrelativo() {
+        if (useDB && altaDAO != null) {
+            try {
+                Integer max = altaDAO.maxCodCorrelativo();
+                if (max == null) return 200001;
+                return max + 1;
+            } catch (SQLException e) {
+                System.out.println("Error al obtener correlativo desde BD, usando archivos: " + e.getMessage());
+            }
+        }
         if (altas.isEmpty()) return 200001;
         return altas.get(altas.size() - 1).getNumAlta() + 1;
     }
 
     public void actualizarArchivo() {
-        grabarAltas();	
+        if (useDB && altaDAO != null) {
+            try {
+                for (Alta a : altas) altaDAO.actualizar(a);
+            } catch (SQLException e) {
+                System.out.println("Error al actualizar altas en BD, guardando en .txt: " + e.getMessage());
+                grabarAltas();
+            }
+        } else grabarAltas();
     }
 
     private void grabarAltas() {
@@ -67,6 +105,15 @@ public class ArregloAltas {
     private void cargarAltas() {
         File archivo = new File(RUTA_ARCHIVO);
         System.out.println("Intentando cargar altas desde: " + archivo.getAbsolutePath());
+        if (useDB && altaDAO != null) {
+            try {
+                altas = altaDAO.listar();
+                System.out.println("Altas cargadas desde BD: " + altas.size());
+                return;
+            } catch (SQLException e) {
+                System.out.println("No se pudo cargar altas desde BD (se usará archivo): " + e.getMessage());
+            }
+        }
         try {
             if (!archivo.exists()) {
                 archivo.createNewFile();

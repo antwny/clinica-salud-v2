@@ -3,24 +3,41 @@ package arreglos;
 import java.io.*;
 import java.util.ArrayList;
 import clases.Internamiento;
+import persistencia.InternamientoDAO;
+import persistencia.DBConnection;
+import java.sql.SQLException;
 
 public class ArregloInternamientos {
     private ArrayList<Internamiento> internamientos;
     private static final String RUTA_ARCHIVO = System.getProperty("user.dir") + File.separator + "internamientos.txt";
+    private boolean useDB = false;
+    private InternamientoDAO internamientoDAO = null;
 
     public ArregloInternamientos() {
         internamientos = new ArrayList<Internamiento>();
+        try { useDB = DBConnection.isAvailable(); } catch (Exception e) { useDB = false; }
+        if (useDB) internamientoDAO = new InternamientoDAO();
         cargarInternamientos();
     }
 
     public void adicionar(Internamiento x) {
         internamientos.add(x);
-        grabarInternamientos();
+        if (useDB && internamientoDAO != null) {
+            try { internamientoDAO.insertar(x); } catch (SQLException e) {
+                System.out.println("Error al insertar internamiento en BD, guardando en .txt: " + e.getMessage());
+                grabarInternamientos();
+            }
+        } else grabarInternamientos();
     }
 
     public void eliminar(Internamiento x) {
         internamientos.remove(x);
-        grabarInternamientos();
+        if (useDB && internamientoDAO != null) {
+            try { internamientoDAO.eliminar(x.getNumInternamiento()); } catch (SQLException e) {
+                System.out.println("Error al eliminar internamiento en BD, actualizando .txt: " + e.getMessage());
+                grabarInternamientos();
+            }
+        } else grabarInternamientos();
     }
 
     public int tamanio() {
@@ -32,10 +49,15 @@ public class ArregloInternamientos {
     }
 
     public Internamiento buscar(int codigo) {
-        for (Internamiento x : internamientos) {
-            if (x.getNumInternamiento() == codigo)
-                return x;
+        if (useDB && internamientoDAO != null) {
+            try {
+                Internamiento x = internamientoDAO.buscar(codigo);
+                if (x != null) return x;
+            } catch (SQLException e) {
+                System.out.println("Error al buscar internamiento en BD, usando cache: " + e.getMessage());
+            }
         }
+        for (Internamiento x : internamientos) if (x.getNumInternamiento() == codigo) return x;
         return null;
     }
 
@@ -48,12 +70,28 @@ public class ArregloInternamientos {
     }
 
     public int codigoCorrelativo() {
+        if (useDB && internamientoDAO != null) {
+            try {
+                Integer max = internamientoDAO.maxCodCorrelativo();
+                if (max == null) return 100001;
+                return max + 1;
+            } catch (SQLException e) {
+                System.out.println("Error al obtener correlativo desde BD, usando archivos: " + e.getMessage());
+            }
+        }
         if (internamientos.isEmpty()) return 100001;
         return internamientos.get(internamientos.size() - 1).getNumInternamiento() + 1;
     }
 
     public void actualizarArchivo() {
-        grabarInternamientos();
+        if (useDB && internamientoDAO != null) {
+            try {
+                for (Internamiento x : internamientos) internamientoDAO.actualizar(x);
+            } catch (SQLException e) {
+                System.out.println("Error al actualizar internamientos en BD, guardando en .txt: " + e.getMessage());
+                grabarInternamientos();
+            }
+        } else grabarInternamientos();
     }
 
     private void grabarInternamientos() {
@@ -76,6 +114,15 @@ public class ArregloInternamientos {
     private void cargarInternamientos() {
         File archivo = new File(RUTA_ARCHIVO);
         System.out.println("Intentando cargar internamientos desde: " + archivo.getAbsolutePath());
+        if (useDB && internamientoDAO != null) {
+            try {
+                internamientos = internamientoDAO.listar();
+                System.out.println("Internamientos cargados desde BD: " + internamientos.size());
+                return;
+            } catch (SQLException e) {
+                System.out.println("No se pudo cargar internamientos desde BD (se usará archivo): " + e.getMessage());
+            }
+        }
         try {
             if (!archivo.exists()) {
                 archivo.createNewFile();

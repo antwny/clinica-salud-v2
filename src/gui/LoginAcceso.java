@@ -74,7 +74,7 @@ public class LoginAcceso extends JFrame  {
         contentPane.add(txtUsuario);
         txtUsuario.setColumns(10);
 
-        JLabel lblClave = new JLabel("CONTRASEÑA :");
+        JLabel lblClave = new JLabel("CONTRASEï¿½A :");
         lblClave.setForeground(Color.WHITE);
         
         lblClave.setFont(new Font("Segoe UI Black", Font.PLAIN, 20));
@@ -99,7 +99,7 @@ public class LoginAcceso extends JFrame  {
         	    String clave = getClave();
 
         	    //Usuarios y contraseÃ±as permitidos 
-        	    String[] usuarios = {"luisEspinoza", "luisAtalaya", "danielMilla"};
+        	    String[] usuarios = {"luisEspinoza", "antony", "danielMilla"};
         	    String[] claves = {"970163", "984198", "940281"};
 
         	    boolean acceso = false;
@@ -114,7 +114,7 @@ public class LoginAcceso extends JFrame  {
         	            break;
         	        }
         	        }catch (Exception z) { 
-        	        	System.out.println("Ingresé usuario y clave");
+        	        	System.out.println("Ingresï¿½ usuario y clave");
         	        	}
         	    }
         	    if (acceso) {
@@ -122,7 +122,7 @@ public class LoginAcceso extends JFrame  {
         	        nombreUsuario = formatearNombre(nombreUsuario);
 
         	        JOptionPane.showMessageDialog(LoginAcceso.this,
-        	            "¡Acceso coincidido a: " + nombreUsuario + "!");
+        	            "ï¿½Acceso coincidido a: " + nombreUsuario + "!");
         	        
         	        try {
         	            UIManager.setLookAndFeel(new FlatLightLaf());
@@ -138,7 +138,7 @@ public class LoginAcceso extends JFrame  {
         	        frm.setLocationRelativeTo(null);
         	        dispose();
         	    } else {
-        	        mensajeError("¡Acceso denegado!");
+        	        mensajeError("ï¿½Acceso denegado!");
         	        txtUsuario.setText("");
         	        jPass.setText("");
         	        txtUsuario.requestFocus();

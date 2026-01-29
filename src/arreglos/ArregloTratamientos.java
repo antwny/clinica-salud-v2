@@ -3,24 +3,41 @@ package arreglos;
 import java.io.*;
 import java.util.ArrayList;
 import clases.Tratamiento;
+import persistencia.TratamientoDAO;
+import persistencia.DBConnection;
+import java.sql.SQLException;
 
 public class ArregloTratamientos {
 	private static final String RUTA_ARCHIVO = System.getProperty("user.dir") + File.separator + "tratamientos.txt";
     private ArrayList<Tratamiento> tratamientos;
+    private boolean useDB = false;
+    private TratamientoDAO tratamientoDAO = null;
 
     public ArregloTratamientos() {
         tratamientos = new ArrayList<Tratamiento>();
+        try { useDB = DBConnection.isAvailable(); } catch (Exception e) { useDB = false; }
+        if (useDB) tratamientoDAO = new TratamientoDAO();
         cargarTratamientos();
     }
 
     public void adicionar(Tratamiento x) {
         tratamientos.add(x);
-        grabarTratamientos();
+        if (useDB && tratamientoDAO != null) {
+            try { tratamientoDAO.insertar(x); } catch (SQLException e) {
+                System.out.println("Error al insertar tratamiento en BD, guardando en .txt: " + e.getMessage());
+                grabarTratamientos();
+            }
+        } else grabarTratamientos();
     }
 
     public void eliminar(Tratamiento x) {
         tratamientos.remove(x);
-        grabarTratamientos();
+        if (useDB && tratamientoDAO != null) {
+            try { tratamientoDAO.eliminar(x.getCodTratamiento()); } catch (SQLException e) {
+                System.out.println("Error al eliminar tratamiento en BD, actualizando .txt: " + e.getMessage());
+                grabarTratamientos();
+            }
+        } else grabarTratamientos();
     }
 
     public int tamanio() {
@@ -32,21 +49,41 @@ public class ArregloTratamientos {
     }
 
     public Tratamiento buscar(int codigo) {
-        for (Tratamiento t : tratamientos) {
-            if (t.getCodTratamiento() == codigo)
-                return t;
+        if (useDB && tratamientoDAO != null) {
+            try {
+                Tratamiento t = tratamientoDAO.buscar(codigo);
+                if (t != null) return t;
+            } catch (SQLException e) {
+                System.out.println("Error al buscar tratamiento en BD, usando cache: " + e.getMessage());
+            }
         }
+        for (Tratamiento t : tratamientos) if (t.getCodTratamiento() == codigo) return t;
         return null;
     }
 
     public int codigoCorrelativo() {
-        if (tratamientos.isEmpty())
-            return 101;
+        if (useDB && tratamientoDAO != null) {
+            try {
+                Integer max = tratamientoDAO.maxCodCorrelativo();
+                if (max == null) return 101;
+                return max + 1;
+            } catch (SQLException e) {
+                System.out.println("Error al obtener correlativo desde BD, usando archivos: " + e.getMessage());
+            }
+        }
+        if (tratamientos.isEmpty()) return 101;
         return tratamientos.get(tratamientos.size() - 1).getCodTratamiento() + 1;
     }
 
     public void actualizarArchivo() {
-        grabarTratamientos();
+        if (useDB && tratamientoDAO != null) {
+            try {
+                for (Tratamiento t : tratamientos) tratamientoDAO.actualizar(t);
+            } catch (SQLException e) {
+                System.out.println("Error al actualizar tratamientos en BD, guardando en .txt: " + e.getMessage());
+                grabarTratamientos();
+            }
+        } else grabarTratamientos();
     }
 
     private void grabarTratamientos() {
@@ -69,6 +106,15 @@ public class ArregloTratamientos {
     private void cargarTratamientos() {
         File archivo = new File(RUTA_ARCHIVO);
         System.out.println("Intentando cargar tratamientos desde: " + archivo.getAbsolutePath());
+        if (useDB && tratamientoDAO != null) {
+            try {
+                tratamientos = tratamientoDAO.listar();
+                System.out.println("Tratamientos cargados desde BD: " + tratamientos.size());
+                return;
+            } catch (SQLException e) {
+                System.out.println("No se pudo cargar tratamientos desde BD (se usará archivo): " + e.getMessage());
+            }
+        }
         try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
             String linea;
             while ((linea = br.readLine()) != null) {
